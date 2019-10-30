@@ -13,9 +13,7 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.0.100
-    - name: Move to sources directory
-      run: cd sources    
     - name: Build with dotnet
-      run: dotnet build --configuration Release
+      run: dotnet build --configuration Release sources
     - name: Execute test
-      run: dotnet test
+      run: dotnet test sources
