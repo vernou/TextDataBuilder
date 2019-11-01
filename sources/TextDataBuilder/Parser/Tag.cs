@@ -19,7 +19,9 @@ namespace TextDataBuilder.Parser
                 var name = text.Trim();
                 if(Regex.IsMatch(name, "^[a-zA-Z0-9]+$"))
                     return text.Trim();
-                throw new InvalidOperationException($"The prototype name '{name}' is invalid. Valid characters are [a-zA-Z0-9]");
+                if(name == string.Empty)
+                    throw new InvalidOperationException($"The prototype name '{name}' is invalid. The name can't be empty");
+                throw new InvalidOperationException($"The prototype name '{name}' is invalid. Valid characters are [a-zA-Z0-9].");
             }
         }
     }

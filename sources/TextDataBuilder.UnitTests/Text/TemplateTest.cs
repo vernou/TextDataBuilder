@@ -20,8 +20,16 @@ namespace TextDataBuilder.UnitTests.Text
         public void OutputRawTextWithBreakLine()
         {
             var result = new StringBuilder();
-            new Template(new StringReader("First Line" + Environment.NewLine + "Second Line" )).Print(result);
+            new Template(new StringReader("First Line" + Environment.NewLine + "Second Line")).Print(result);
             Assert.Equal("First Line" + Environment.NewLine + "Second Line", result.ToString());
+        }
+
+        [Fact]
+        public void OutputTagName()
+        {
+            var result = new StringBuilder();
+            new Template(new StringReader("@{FirstTag}")).Print(result);
+            Assert.Equal("FirstTag", result.ToString());
         }
     }
 }
