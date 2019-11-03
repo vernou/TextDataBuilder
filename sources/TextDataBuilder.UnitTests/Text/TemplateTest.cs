@@ -3,6 +3,7 @@ using Xunit;
 using TextDataBuilder.Text;
 using System.IO;
 using System.Text;
+using TextDataBuilder.UnitTests.Core;
 
 namespace TextDataBuilder.UnitTests.Text
 {
@@ -30,6 +31,24 @@ namespace TextDataBuilder.UnitTests.Text
             var result = new StringBuilder();
             new Template(new StringReader("@{FirstTag}")).Print(result);
             Assert.Equal("FirstTag", result.ToString());
+        }
+
+        [Fact]
+        public void OutputRandomInteger()
+        {
+            var dice = new RiggedDice(42);
+            var result = new StringBuilder();
+            new Template(new StringReader("@{RandomInteger}"), dice).Print(result);
+            Assert.Equal("42", result.ToString());
+        }
+
+        [Fact]
+        public void OutputRandomIntegerWithParameters()
+        {
+            var dice = new RiggedDice(42);
+            var result = new StringBuilder();
+            new Template(new StringReader("A random integer : @{RandomInteger Min=42, Max=42}"), dice).Print(result);
+            Assert.Equal("A random integer : 42", result.ToString());
         }
     }
 }
