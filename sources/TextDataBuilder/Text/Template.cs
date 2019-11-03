@@ -1,5 +1,9 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using TextDataBuilder.Core;
+using TextDataBuilder.Parser;
 
 namespace TextDataBuilder.Text
 {
@@ -8,11 +12,17 @@ namespace TextDataBuilder.Text
         private const string TagStartToken = "@{";
         private const string TagEndToken = "}";
         private readonly TextReader reader;
+        private readonly IDice dice;
 
-        public Template(TextReader reader)
+        public Template(TextReader reader, IDice dice)
         {
             this.reader = reader;
+            this.dice = dice;
         }
+
+        public Template(TextReader reader)
+            : this(reader, new Dice())
+        { }
 
         public void Print(StringBuilder output)
         {
@@ -28,8 +38,8 @@ namespace TextDataBuilder.Text
                     if(indexOfTagEnd >= 0)
                     {
                         var indexOfTagBodyEnd = indexOfTagEnd - 1;
-                        var tag = new Parser.Tag(Substring(line, indexOfTagBodyStart, indexOfTagBodyEnd));
-                        output.Append(tag.Name);
+                        var tag = new Tag(Substring(line, indexOfTagBodyStart, indexOfTagBodyEnd));
+                        PrintTag(output, tag);
                         output.Append(Substring(line, indexOfTagEnd + 1));
                     }
                 }
@@ -40,6 +50,32 @@ namespace TextDataBuilder.Text
                 line = reader.ReadLine();
                 if(line != null)
                     output.AppendLine();
+            }
+        }
+
+        private void PrintTag(StringBuilder output, Tag tag)
+        {
+            if(tag.Name == nameof(RandomInteger))
+            {
+                var min = 0;
+                var max = int.MaxValue;
+                string? value = string.Empty;
+                if(tag.Parameters.TryGetValue("Min", out value))
+                {
+                    if(!int.TryParse(value, out min))
+                        throw new InvalidOperationException("The 'Min' parameter's value is invalid.");
+                }
+                if(tag.Parameters.TryGetValue("Max", out value))
+                {
+                    if(!int.TryParse(value, out max))
+                        throw new InvalidOperationException("The 'Max' parameter's value is invalid.");
+                }
+                var text = new RandomInteger(dice, min, max);
+                text.Print(output);
+            }
+            else
+            {
+                output.Append(tag.Name);
             }
         }
 
