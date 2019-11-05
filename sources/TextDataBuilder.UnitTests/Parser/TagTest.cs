@@ -68,5 +68,17 @@ namespace TextDataBuilder.UnitTests.Parser
             Assert.True(tag.Parameters.ContainsKey("Parameter"));
             Assert.Equal(" V a l u e ", tag.Parameters["Parameter"]);
         }
+
+        [Fact]
+        public void TagWithoutAlias()
+        {
+            Assert.Equal(string.Empty, new Tag("TagName").Alias);
+        }
+
+        [Fact]
+        public void TagWithtAlias()
+        {
+            Assert.Equal("TagAlias", new Tag("TagName As=TagAlias").Alias);
+        }
     }
 }

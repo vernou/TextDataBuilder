@@ -15,7 +15,7 @@ namespace TextDataBuilder.Parser
         }
 
         public string Name => fields.Value.Name;
-
+        public string Alias => fields.Value.Parameters.ContainsKey("As") ? fields.Value.Parameters["As"] : string.Empty;
         public IReadOnlyDictionary<string, string> Parameters => fields.Value.Parameters;
 
         private static Fields Parse(string text)
