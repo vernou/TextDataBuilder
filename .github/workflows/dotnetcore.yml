@@ -16,4 +16,4 @@ jobs:
     - name: Build with dotnet
       run: dotnet build --configuration Release sources
     - name: Execute test
-      run: dotnet test sources
+      run: dotnet test sources /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Threshold=80 /p:CoverletOutput=/TestResults/
