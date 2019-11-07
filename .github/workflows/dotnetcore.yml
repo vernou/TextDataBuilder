@@ -22,3 +22,4 @@ jobs:
       with:
         token: 51ba0f4f-ef43-4f79-9b0c-d157a469702c
         file: sources/TextDataBuilder.UnitTests/TestResults/coverage.opencover.xml
+
