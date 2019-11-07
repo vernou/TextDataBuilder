@@ -1,6 +1,6 @@
 name: Build and Test
 
-on: [push,pull_request]
+on: [push]
 
 jobs:
   build:
@@ -16,4 +16,10 @@ jobs:
     - name: Build with dotnet
       run: dotnet build --configuration Release sources
     - name: Execute test
-      run: dotnet test sources
+      run: dotnet test sources /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Threshold=80 /p:CoverletOutput=TestResults/
+    - name: Export code coverage to Codecov
+      uses: codecov/codecov-action@v1.0.3
+      with:
+        token: 51ba0f4f-ef43-4f79-9b0c-d157a469702c
+        file: sources/TextDataBuilder.UnitTests/TestResults/coverage.opencover.xml
+
