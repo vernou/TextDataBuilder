@@ -16,7 +16,7 @@ jobs:
     - name: Build with dotnet
       run: dotnet build --configuration Release sources
     - name: Execute test
-      run: dotnet test sources /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Threshold=80 /p:CoverletOutput=TestResults
+      run: dotnet test sources /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:Threshold=80 /p:CoverletOutput=TestResults/
     - name: Export code coverage to Codecov
       uses: codecov/codecov-action@v1.0.3
       with:
