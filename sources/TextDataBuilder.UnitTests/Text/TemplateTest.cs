@@ -52,6 +52,15 @@ namespace TextDataBuilder.UnitTests.Text
         }
 
         [Fact]
+        public void ReprintFromTagAlias()
+        {
+            var dice = new RiggedDice(42);
+            var result = new StringBuilder();
+            new Template(new StringReader("Tow identical random integers : @{RandomInteger As=Rand, Min=42, Max=42} and @{Rand}"), dice).Print(result);
+            Assert.Equal("Tow identical random integers : 42 and 42", result.ToString());
+        }
+
+        [Fact]
         public void PrintTwoTagsOneLine()
         {
             var result = new StringBuilder();

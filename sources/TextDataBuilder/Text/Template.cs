@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using TextDataBuilder.Core;
@@ -10,6 +11,7 @@ namespace TextDataBuilder.Text
     {
         private const string TagStartToken = "@{";
         private const string TagEndToken = "}";
+        private readonly Dictionary<string, IText> tags = new Dictionary<string, IText>();
         private readonly TextReader reader;
         private readonly IDice dice;
 
@@ -57,30 +59,51 @@ namespace TextDataBuilder.Text
             }
         }
 
+        public void Reprint(StringBuilder output)
+        {
+            throw new NotImplementedException();
+        }
+
         private void PrintTag(StringBuilder output, Tag tag)
         {
             if(tag.Name == nameof(RandomInteger))
             {
-                var min = 0;
-                var max = int.MaxValue;
-                string? value = string.Empty;
-                if(tag.Parameters.TryGetValue("Min", out value))
-                {
-                    if(!int.TryParse(value, out min))
-                        throw new InvalidOperationException("The 'Min' parameter's value is invalid.");
-                }
-                if(tag.Parameters.TryGetValue("Max", out value))
-                {
-                    if(!int.TryParse(value, out max))
-                        throw new InvalidOperationException("The 'Max' parameter's value is invalid.");
-                }
-                var text = new RandomInteger(dice, min, max);
-                text.Print(output);
+                PrintRandomInteger(output, tag);
+            }
+            else if(tags.ContainsKey(tag.Name))
+            {
+                tags[tag.Name].Reprint(output);
             }
             else
             {
                 output.Append(tag.Name);
             }
+        }
+
+        private void PrintRandomInteger(StringBuilder output, Tag tag)
+        {
+            var text = CreateRandomInteger(tag);
+            text.Print(output);
+            if(tag.Alias != string.Empty)
+            tags.Add(tag.Alias, text);
+        }
+
+        private IText CreateRandomInteger(Tag tag)
+        {
+            var min = 0;
+            var max = int.MaxValue;
+            string? value = string.Empty;
+            if(tag.Parameters.TryGetValue("Min", out value))
+            {
+                if(!int.TryParse(value, out min))
+                    throw new InvalidOperationException("The 'Min' parameter's value is invalid.");
+            }
+            if(tag.Parameters.TryGetValue("Max", out value))
+            {
+                if(!int.TryParse(value, out max))
+                    throw new InvalidOperationException("The 'Max' parameter's value is invalid.");
+            }
+            return new RandomInteger(dice, min, max);
         }
 
         private static string Substring(string str, int start)
