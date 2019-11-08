@@ -16,9 +16,17 @@ namespace TextDataBuilder.Text
             this.max = max;
         }
 
+        public int Value { get; private set; }
+
         public void Print(StringBuilder output)
         {
-            output.Append(dice.Roll(min, max));
+            Value = dice.Roll(min, max);
+            output.Append(Value);
+        }
+
+        public void Reprint(StringBuilder output)
+        {
+            output.Append(Value);
         }
     }
 }
