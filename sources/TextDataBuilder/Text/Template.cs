@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using TextDataBuilder.Core;
@@ -32,16 +31,21 @@ namespace TextDataBuilder.Text
                 var indexOfTagStart = line.IndexOf(TagStartToken);
                 if(indexOfTagStart >= 0)
                 {
-                    output.Append(line.Substring(0, indexOfTagStart));
-                    var indexOfTagBodyStart = indexOfTagStart + TagStartToken.Length;
-                    var indexOfTagEnd = line.IndexOf("}", indexOfTagBodyStart);
-                    if(indexOfTagEnd >= 0)
+                    int indexOfTagEnd = 0;
+                    do
                     {
+                        output.Append(line.Substring(indexOfTagEnd, indexOfTagStart - indexOfTagEnd));
+                        var indexOfTagBodyStart = indexOfTagStart + TagStartToken.Length;
+                        indexOfTagEnd = line.IndexOf("}", indexOfTagBodyStart);
+                        if(indexOfTagEnd < 0)
+                            throw new InvalidOperationException("Miss '}'");
                         var indexOfTagBodyEnd = indexOfTagEnd - 1;
                         var tag = new Tag(Substring(line, indexOfTagBodyStart, indexOfTagBodyEnd));
                         PrintTag(output, tag);
-                        output.Append(Substring(line, indexOfTagEnd + 1));
-                    }
+                        indexOfTagStart = line.IndexOf(TagStartToken, indexOfTagEnd);
+                        indexOfTagEnd++;
+                    } while(indexOfTagStart >= 0);
+                    output.Append(Substring(line, indexOfTagEnd + 1));
                 }
                 else
                 {

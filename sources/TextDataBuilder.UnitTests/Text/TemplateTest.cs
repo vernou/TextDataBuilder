@@ -50,5 +50,13 @@ namespace TextDataBuilder.UnitTests.Text
             new Template(new StringReader("A random integer : @{RandomInteger Min=42, Max=42}"), dice).Print(result);
             Assert.Equal("A random integer : 42", result.ToString());
         }
+
+        [Fact]
+        public void PrintTwoTagsOneLine()
+        {
+            var result = new StringBuilder();
+            new Template(new StringReader("@{FirstTag} and @{SecondTag}")).Print(result);
+            Assert.Equal("FirstTag and SecondTag", result.ToString());
+        }
     }
 }
