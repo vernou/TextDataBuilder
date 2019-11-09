@@ -67,5 +67,53 @@ namespace TextDataBuilder.UnitTests.Text
             new Template(new StringReader("@{FirstTag} and @{SecondTag}")).Print(result);
             Assert.Equal("FirstTag and SecondTag", result.ToString());
         }
+
+        [Fact]
+        public void PrintCsvTag()
+        {
+            var path = Path.GetTempFileName();
+            File.WriteAllText(path, "Value1,Value2,Value3" + Environment.NewLine + "Value4,Value5,Value6");
+
+            var result = new StringBuilder();
+            new Template(
+                new StringReader(
+                    "@{CSV Path=\"" + path + "\"}" + Environment.NewLine +
+                    "Column 1 : {0}, Column 2 : {1}, Column 3 : {2}" + Environment.NewLine +
+                    "@{EndCSV}"
+                )
+            ).Print(result);
+
+            Assert.Equal(
+                "Column 1 : Value1, Column 2 : Value2, Column 3 : Value3" + Environment.NewLine +
+                "Column 1 : Value4, Column 2 : Value5, Column 3 : Value6",
+                result.ToString()
+            );
+        }
+
+        [Fact]
+        public void PrintSqlInsertFromCsv()
+        {
+            var path = Path.GetTempFileName();
+            File.WriteAllText(path, "Value1,Value2,Value3" + Environment.NewLine + "Value4,Value5,Value6");
+
+            var result = new StringBuilder();
+            new Template(
+                new StringReader(
+                    "INSERT INTO MyTable (Col1, Col2, Col3)" + Environment.NewLine +
+                    "VALUES" + Environment.NewLine +
+                    "@{CSV Path=\"" + path + "\"}" + Environment.NewLine +
+                    "({0}, {1}, {2})," + Environment.NewLine +
+                    "@{EndCSV}"
+                )
+            ).Print(result);
+
+            Assert.Equal(
+                "INSERT INTO MyTable (Col1, Col2, Col3)" + Environment.NewLine +
+                "VALUES" + Environment.NewLine +
+                "(Value1, Value2, Value3)," + Environment.NewLine +
+                "(Value4, Value5, Value6),",
+                result.ToString()
+            );
+        }
     }
 }

@@ -27,24 +27,15 @@ namespace TextDataBuilder.Text
 
         public void Print(StringBuilder output)
         {
-            var broswer = new Browser(reader.ReadToEnd());
-            while(broswer.CursorIsIn)
+            var browser = new Browser(reader.ReadToEnd());
+            while(browser.CursorIsIn)
             {
-                while(broswer.CursorIsIn && !broswer.StartWith(TagStartToken))
-                    broswer.Move();
-                output.Append(broswer.Read());
-                if(broswer.CursorIsIn)
+                while(browser.CursorIsIn && !browser.StartWith(TagStartToken))
+                    browser.Move();
+                output.Append(browser.Read());
+                if(browser.CursorIsIn)
                 {
-                    broswer.Move(TagStartToken.Length);
-                    broswer.JumpReaderCursorToCursor();
-                    while(broswer.CursorIsIn && !broswer.StartWith(TagEndToken))
-                        broswer.Move();
-                    if(!broswer.CursorIsIn)
-                        throw new InvalidOperationException($"Miss '{TagEndToken}'");
-                    var tag = new Tag(broswer.Read());
-                    PrintTag(output, tag);
-                    broswer.Move(TagEndToken.Length);
-                    broswer.JumpReaderCursorToCursor();
+                    PrintTag(output, browser);
                 }
             }
         }
@@ -54,7 +45,38 @@ namespace TextDataBuilder.Text
             throw new NotImplementedException();
         }
 
-        private void PrintTag(StringBuilder output, Tag tag)
+        private void PrintTag(StringBuilder output, Browser browser)
+        {
+            browser.Move(TagStartToken.Length);
+            browser.JumpReaderCursorToCursor();
+            while(browser.CursorIsIn && !browser.StartWith(TagEndToken))
+                browser.Move();
+            if(!browser.CursorIsIn)
+                throw new InvalidOperationException($"Miss '{TagEndToken}'");
+            var tag = new Tag(browser.Read());
+            browser.Move(TagEndToken.Length);
+            browser.JumpReaderCursorToCursor();
+            if(tag.Name == "CSV")
+                PrintTagCsv(output, tag, browser);
+            else
+                PrintTag2(output, tag);
+        }
+
+        private void PrintTagCsv(StringBuilder output, Tag tag, Browser browser)
+        {
+            var tagEndCsv = Environment.NewLine + "@{EndCSV}";
+            browser.Move(Environment.NewLine.Length);
+            browser.JumpReaderCursorToCursor();
+            while(browser.CursorIsIn && !browser.StartWith(tagEndCsv))
+                browser.Move();
+            var format = browser.Read();
+            browser.Move(tagEndCsv.Length);
+            browser.JumpReaderCursorToCursor();
+            var csv = new Csv(tag.Parameters["Path"], format);
+            csv.Print(output);
+        }
+
+        private void PrintTag2(StringBuilder output, Tag tag)
         {
             if(tag.Name == nameof(RandomInteger))
             {
@@ -94,18 +116,6 @@ namespace TextDataBuilder.Text
                     throw new InvalidOperationException("The 'Max' parameter's value is invalid.");
             }
             return new RandomInteger(dice, min, max);
-        }
-
-        private static string Substring(string str, int start)
-        {
-            return Substring(str, start, str.Length - 1);
-        }
-
-        private static string Substring(string str, int start, int end)
-        {
-            if(start > end)
-                return string.Empty;
-            return str.Substring(start, end - start + 1);
         }
     }
 }
