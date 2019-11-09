@@ -27,35 +27,16 @@ namespace TextDataBuilder.Text
 
         public void Print(StringBuilder output)
         {
-            var line = reader.ReadLine();
-            while(line != null)
+            var browser = new Browser(reader.ReadToEnd());
+            while(browser.CursorIsIn)
             {
-                var indexOfTagStart = line.IndexOf(TagStartToken);
-                if(indexOfTagStart >= 0)
+                while(browser.CursorIsIn && !browser.StartWith(TagStartToken))
+                    browser.Move();
+                output.Append(browser.Read());
+                if(browser.CursorIsIn)
                 {
-                    int indexOfTagEnd = 0;
-                    do
-                    {
-                        output.Append(line.Substring(indexOfTagEnd, indexOfTagStart - indexOfTagEnd));
-                        var indexOfTagBodyStart = indexOfTagStart + TagStartToken.Length;
-                        indexOfTagEnd = line.IndexOf("}", indexOfTagBodyStart);
-                        if(indexOfTagEnd < 0)
-                            throw new InvalidOperationException("Miss '}'");
-                        var indexOfTagBodyEnd = indexOfTagEnd - 1;
-                        var tag = new Tag(Substring(line, indexOfTagBodyStart, indexOfTagBodyEnd));
-                        PrintTag(output, tag);
-                        indexOfTagStart = line.IndexOf(TagStartToken, indexOfTagEnd);
-                        indexOfTagEnd++;
-                    } while(indexOfTagStart >= 0);
-                    output.Append(Substring(line, indexOfTagEnd + 1));
+                    PrintTag(output, browser);
                 }
-                else
-                {
-                    output.Append(line);
-                }
-                line = reader.ReadLine();
-                if(line != null)
-                    output.AppendLine();
             }
         }
 
@@ -64,7 +45,38 @@ namespace TextDataBuilder.Text
             throw new NotImplementedException();
         }
 
-        private void PrintTag(StringBuilder output, Tag tag)
+        private void PrintTag(StringBuilder output, Browser browser)
+        {
+            browser.Move(TagStartToken.Length);
+            browser.JumpReaderCursorToCursor();
+            while(browser.CursorIsIn && !browser.StartWith(TagEndToken))
+                browser.Move();
+            if(!browser.CursorIsIn)
+                throw new InvalidOperationException($"Miss '{TagEndToken}'");
+            var tag = new Tag(browser.Read());
+            browser.Move(TagEndToken.Length);
+            browser.JumpReaderCursorToCursor();
+            if(tag.Name == "CSV")
+                PrintTagCsv(output, tag, browser);
+            else
+                PrintTag2(output, tag);
+        }
+
+        private void PrintTagCsv(StringBuilder output, Tag tag, Browser browser)
+        {
+            var tagEndCsv = Environment.NewLine + "@{EndCSV}";
+            browser.Move(Environment.NewLine.Length);
+            browser.JumpReaderCursorToCursor();
+            while(browser.CursorIsIn && !browser.StartWith(tagEndCsv))
+                browser.Move();
+            var format = browser.Read();
+            browser.Move(tagEndCsv.Length);
+            browser.JumpReaderCursorToCursor();
+            var csv = new Csv(tag.Parameters["Path"], format);
+            csv.Print(output);
+        }
+
+        private void PrintTag2(StringBuilder output, Tag tag)
         {
             if(tag.Name == nameof(RandomInteger))
             {
@@ -104,18 +116,6 @@ namespace TextDataBuilder.Text
                     throw new InvalidOperationException("The 'Max' parameter's value is invalid.");
             }
             return new RandomInteger(dice, min, max);
-        }
-
-        private static string Substring(string str, int start)
-        {
-            return Substring(str, start, str.Length - 1);
-        }
-
-        private static string Substring(string str, int start, int end)
-        {
-            if(start > end)
-                return string.Empty;
-            return str.Substring(start, end - start + 1);
         }
     }
 }
