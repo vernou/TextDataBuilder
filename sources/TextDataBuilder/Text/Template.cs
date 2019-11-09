@@ -27,35 +27,25 @@ namespace TextDataBuilder.Text
 
         public void Print(StringBuilder output)
         {
-            var line = reader.ReadLine();
-            while(line != null)
+            var broswer = new Browser(reader.ReadToEnd());
+            while(broswer.CursorIsIn)
             {
-                var indexOfTagStart = line.IndexOf(TagStartToken);
-                if(indexOfTagStart >= 0)
+                while(broswer.CursorIsIn && !broswer.StartWith(TagStartToken))
+                    broswer.Move();
+                output.Append(broswer.Read());
+                if(broswer.CursorIsIn)
                 {
-                    int indexOfTagEnd = 0;
-                    do
-                    {
-                        output.Append(line.Substring(indexOfTagEnd, indexOfTagStart - indexOfTagEnd));
-                        var indexOfTagBodyStart = indexOfTagStart + TagStartToken.Length;
-                        indexOfTagEnd = line.IndexOf("}", indexOfTagBodyStart);
-                        if(indexOfTagEnd < 0)
-                            throw new InvalidOperationException("Miss '}'");
-                        var indexOfTagBodyEnd = indexOfTagEnd - 1;
-                        var tag = new Tag(Substring(line, indexOfTagBodyStart, indexOfTagBodyEnd));
-                        PrintTag(output, tag);
-                        indexOfTagStart = line.IndexOf(TagStartToken, indexOfTagEnd);
-                        indexOfTagEnd++;
-                    } while(indexOfTagStart >= 0);
-                    output.Append(Substring(line, indexOfTagEnd + 1));
+                    broswer.Move(TagStartToken.Length);
+                    broswer.JumpReaderCursorToCursor();
+                    while(broswer.CursorIsIn && !broswer.StartWith(TagEndToken))
+                        broswer.Move();
+                    if(!broswer.CursorIsIn)
+                        throw new InvalidOperationException($"Miss '{TagEndToken}'");
+                    var tag = new Tag(broswer.Read());
+                    PrintTag(output, tag);
+                    broswer.Move(TagEndToken.Length);
+                    broswer.JumpReaderCursorToCursor();
                 }
-                else
-                {
-                    output.Append(line);
-                }
-                line = reader.ReadLine();
-                if(line != null)
-                    output.AppendLine();
             }
         }
 
