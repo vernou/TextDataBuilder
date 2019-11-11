@@ -1,51 +1,40 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using TextDataBuilder.Core;
-using TextDataBuilder.Parser;
+using TextDataBuilder.Prototype;
 
-namespace TextDataBuilder.Text
+namespace TextDataBuilder.Parser
 {
-    public class Template : IText
+    public class TemplateParser
     {
         private const string TagStartToken = "@{";
         private const string TagEndToken = "}";
-        private readonly Dictionary<string, IText> tags = new Dictionary<string, IText>();
-        private readonly TextReader reader;
+
+        private readonly Dictionary<string, Alias> alias = new Dictionary<string, Alias>();
         private readonly IDice dice;
 
-        public Template(TextReader reader, IDice dice)
+        public TemplateParser(IDice dice)
         {
-            this.reader = reader;
             this.dice = dice;
         }
 
-        public Template(TextReader reader)
-            : this(reader, new Dice())
-        { }
-
-        public void Print(StringBuilder output)
+        public Template Parse(Browser browser)
         {
-            var browser = new Browser(reader.ReadToEnd());
+            var prototypes = new List<IPrototype>();
             while(browser.CursorIsIn)
             {
                 while(browser.CursorIsIn && !browser.StartWith(TagStartToken))
                     browser.Move();
-                output.Append(browser.Read());
+                prototypes.Add(new StaticText(browser.Read()));
                 if(browser.CursorIsIn)
                 {
-                    PrintTag(output, browser);
+                    prototypes.Add(ParseTag(browser));
                 }
             }
+            return new Template(prototypes);
         }
 
-        public void Reprint(StringBuilder output)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void PrintTag(StringBuilder output, Browser browser)
+        private IPrototype ParseTag(Browser browser)
         {
             browser.Move(TagStartToken.Length);
             browser.JumpReaderCursorToCursor();
@@ -57,12 +46,12 @@ namespace TextDataBuilder.Text
             browser.Move(TagEndToken.Length);
             browser.JumpReaderCursorToCursor();
             if(tag.Name == "CSV")
-                PrintTagCsv(output, tag, browser);
+                return ParseTagCsv(browser, tag);
             else
-                PrintTag2(output, tag);
+                return ParseTagData(tag);
         }
 
-        private void PrintTagCsv(StringBuilder output, Tag tag, Browser browser)
+        private IPrototype ParseTagCsv(Browser browser, Tag beginTag)
         {
             var tagEndCsv = Environment.NewLine + "@{EndCSV}";
             browser.Move(Environment.NewLine.Length);
@@ -72,35 +61,38 @@ namespace TextDataBuilder.Text
             var format = browser.Read();
             browser.Move(tagEndCsv.Length);
             browser.JumpReaderCursorToCursor();
-            var csv = new Csv(tag.Parameters["Path"], format);
-            csv.Print(output);
+            return new Csv(beginTag.Parameters["Path"], format);
         }
 
-        private void PrintTag2(StringBuilder output, Tag tag)
+        private IPrototype ParseTagData(Tag tag)
         {
             if(tag.Name == nameof(RandomInteger))
             {
-                PrintRandomInteger(output, tag);
+                return ParseRandomInteger(tag);
             }
-            else if(tags.ContainsKey(tag.Name))
+            else if(alias.ContainsKey(tag.Name))
             {
-                tags[tag.Name].Reprint(output);
+                return alias[tag.Name];
             }
             else
             {
-                output.Append(tag.Name);
+                return new StaticText(tag.Name);
             }
         }
 
-        private void PrintRandomInteger(StringBuilder output, Tag tag)
+        private IPrototype ParseRandomInteger(Tag tag)
         {
             var text = CreateRandomInteger(tag);
-            text.Print(output);
             if(tag.Alias != string.Empty)
-            tags.Add(tag.Alias, text);
+            {
+                var a = new Alias(text);
+                alias.Add(tag.Alias, a);
+                return a;
+            }
+            return text;
         }
 
-        private IText CreateRandomInteger(Tag tag)
+        private IPrototype CreateRandomInteger(Tag tag)
         {
             var min = 0;
             var max = int.MaxValue;

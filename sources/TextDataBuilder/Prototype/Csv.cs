@@ -1,9 +1,9 @@
 using System.Text;
 using Microsoft.VisualBasic.FileIO ;
 
-namespace TextDataBuilder.Text
+namespace TextDataBuilder.Prototype
 {
-    public class Csv : IText
+    public class Csv : IPrototype
     {
         private readonly string path;
         private readonly string format;
@@ -14,8 +14,9 @@ namespace TextDataBuilder.Text
             this.format = format;
         }
 
-        public void Print(StringBuilder output)
+        public string Build()
         {
+            var build = new StringBuilder();
             using(var parser = new TextFieldParser(path))
             {
                 parser.TextFieldType = FieldType.Delimited;
@@ -23,16 +24,12 @@ namespace TextDataBuilder.Text
 
                 while (!parser.EndOfData)
                 {
-                    output.Append(string.Format(format, parser.ReadFields()));
+                    build.Append(string.Format(format, parser.ReadFields()));
                     if(!parser.EndOfData)
-                        output.AppendLine();
+                        build.AppendLine();
                 }
             }
-        }
-
-        public void Reprint(StringBuilder output)
-        {
-            throw new System.NotImplementedException();
+            return build.ToString();
         }
     }
 }
