@@ -10,12 +10,18 @@ namespace TextDataBuilder.Parser
         private const string TagStartToken = "@{";
         private const string TagEndToken = "}";
 
+        private readonly Dictionary<string, Func<Tag, IPrototype>> factory;
         private readonly Dictionary<string, Alias> alias = new Dictionary<string, Alias>();
         private readonly IDice dice;
 
         public TemplateParser(IDice dice)
         {
             this.dice = dice;
+            this.factory = new Dictionary<string, Func<Tag, IPrototype>>
+            {
+                { "Text", CreateRawText },
+                { "RandomInteger", CreateRandomInteger }
+            };
         }
 
         public Template Parse(Browser browser)
@@ -66,13 +72,16 @@ namespace TextDataBuilder.Parser
 
         private IPrototype ParseTagData(Tag tag)
         {
-            if(tag.Name == nameof(RandomInteger))
+            if(factory.ContainsKey(tag.Name))
             {
-                return ParseRandomInteger(tag);
-            }
-            else if(tag.Name == "Text")
-            {
-                return ParseRawText(tag);
+                var text = factory[tag.Name](tag);
+                if(tag.Alias != string.Empty)
+                {
+                    var a = new Alias(text);
+                    alias.Add(tag.Alias, a);
+                    return a;
+                }
+                return text;
             }
             else if(alias.ContainsKey(tag.Name))
             {
@@ -82,18 +91,6 @@ namespace TextDataBuilder.Parser
             {
                 return new StaticText(tag.Name);
             }
-        }
-
-        private IPrototype ParseRandomInteger(Tag tag)
-        {
-            var text = CreateRandomInteger(tag);
-            if(tag.Alias != string.Empty)
-            {
-                var a = new Alias(text);
-                alias.Add(tag.Alias, a);
-                return a;
-            }
-            return text;
         }
 
         private IPrototype CreateRandomInteger(Tag tag)
@@ -114,18 +111,11 @@ namespace TextDataBuilder.Parser
             return new RandomInteger(dice, min, max);
         }
 
-        private IPrototype ParseRawText(Tag tag)
+        private IPrototype CreateRawText(Tag tag)
         {
             if(tag.Parameters.TryGetValue("Raw", out string? raw))
             {
-                var text = new StaticText(raw);
-                if(tag.Alias != string.Empty)
-                {
-                    var a = new Alias(text);
-                    alias.Add(tag.Alias, a);
-                    return a;
-                }
-                return text;
+                return new StaticText(raw);
             }
             else
             {
