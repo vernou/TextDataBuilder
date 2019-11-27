@@ -152,5 +152,20 @@ namespace TextDataBuilder.UnitTests.Parser
                 ).Build()
             );
         }
+
+        [Fact]
+        public void PrintRawText()
+        {
+            Assert.Equal(
+                "Raw text : Poppey",
+                new TemplateParser(
+                    new RiggedDice(42)
+                ).Parse(
+                    new Browser(
+                        @"Raw text : @{Text Raw=""Poppey""}"
+                    )
+                ).Build()
+            );
+        }
     }
 }

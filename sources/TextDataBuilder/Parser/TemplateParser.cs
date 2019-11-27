@@ -70,6 +70,10 @@ namespace TextDataBuilder.Parser
             {
                 return ParseRandomInteger(tag);
             }
+            else if(tag.Name == "Text")
+            {
+                return ParseRawText(tag);
+            }
             else if(alias.ContainsKey(tag.Name))
             {
                 return alias[tag.Name];
@@ -108,6 +112,18 @@ namespace TextDataBuilder.Parser
                     throw new InvalidOperationException("The 'Max' parameter's value is invalid.");
             }
             return new RandomInteger(dice, min, max);
+        }
+
+        private IPrototype ParseRawText(Tag tag)
+        {
+            if(tag.Parameters.TryGetValue("Raw", out string raw))
+            {
+                return new StaticText(raw);
+            }
+            else
+            {
+                throw new InvalidOperationException("Miss 'Raw' parameter.");
+            }
         }
     }
 }
