@@ -167,5 +167,20 @@ namespace TextDataBuilder.UnitTests.Parser
                 ).Build()
             );
         }
+
+        [Fact]
+        public void PrintRawTextWithAlias()
+        {
+            Assert.Equal(
+                "Raw text : Poppey Poppey",
+                new TemplateParser(
+                    new RiggedDice(42)
+                ).Parse(
+                    new Browser(
+                        @"Raw text : @{Text As=Raw, Raw=""Poppey""} @{Raw}"
+                    )
+                ).Build()
+            );
+        }
     }
 }

@@ -116,9 +116,16 @@ namespace TextDataBuilder.Parser
 
         private IPrototype ParseRawText(Tag tag)
         {
-            if(tag.Parameters.TryGetValue("Raw", out string raw))
+            if(tag.Parameters.TryGetValue("Raw", out string? raw))
             {
-                return new StaticText(raw);
+                var text = new StaticText(raw);
+                if(tag.Alias != string.Empty)
+                {
+                    var a = new Alias(text);
+                    alias.Add(tag.Alias, a);
+                    return a;
+                }
+                return text;
             }
             else
             {
