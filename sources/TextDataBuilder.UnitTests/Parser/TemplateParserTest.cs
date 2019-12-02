@@ -103,7 +103,7 @@ namespace TextDataBuilder.UnitTests.Parser
                     new Browser(
                         "@{CSV Path=\"" + path + "\"}" + Environment.NewLine +
                         "Column 1 : {0}, Column 2 : {1}, Column 3 : {2}" + Environment.NewLine +
-                        "@{EndCSV}"
+                        "@{/CSV}"
                     )
                 ).Build()
             );
@@ -131,7 +131,7 @@ namespace TextDataBuilder.UnitTests.Parser
                         "VALUES" + Environment.NewLine +
                         "@{CSV Path=\"" + path + "\"}" + Environment.NewLine +
                         "({0}, {1}, {2})," + Environment.NewLine +
-                        "@{EndCSV}"
+                        "@{/CSV}"
                     )
                 ).Build()
             );

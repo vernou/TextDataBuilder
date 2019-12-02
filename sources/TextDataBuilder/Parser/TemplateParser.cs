@@ -59,7 +59,7 @@ namespace TextDataBuilder.Parser
 
         private IPrototype ParseTagCsv(Browser browser, Tag beginTag)
         {
-            var tagEndCsv = Environment.NewLine + "@{EndCSV}";
+            var tagEndCsv = Environment.NewLine + "@{/CSV}";
             browser.Move(Environment.NewLine.Length);
             browser.JumpReaderCursorToCursor();
             while(browser.CursorIsIn && !browser.StartWith(tagEndCsv))
