@@ -182,5 +182,35 @@ namespace TextDataBuilder.UnitTests.Parser
                 ).Build()
             );
         }
+
+        [Fact]
+        public void PrintRawTextThatContainsTag()
+        {
+            Assert.Equal(
+                "Raw text : @{Tag}",
+                new TemplateParser(
+                    new RiggedDice(42)
+                ).Parse(
+                    new Browser(
+                        @"Raw text : @{Text Raw=""@{Tag}""}"
+                    )
+                ).Build()
+            );
+        }
+
+        [Fact]
+        public void PrintRawTextThatContainsTagWithParameters()
+        {
+            Assert.Equal(
+                @"Raw text : @{Tag Param1=Value1, Param2 = ""Value"" }",
+                new TemplateParser(
+                    new RiggedDice(42)
+                ).Parse(
+                    new Browser(
+                        @"Raw text : @{Text Raw=""@{Tag Param1=Value1, Param2 = """"Value"""" }""}"
+                    )
+                ).Build()
+            );
+        }
     }
 }

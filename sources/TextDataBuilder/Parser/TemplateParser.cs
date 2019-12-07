@@ -42,13 +42,8 @@ namespace TextDataBuilder.Parser
 
         private IPrototype ParseTag(Browser browser)
         {
-            browser.Move(TagStartToken.Length);
-            browser.JumpReaderCursorToCursor();
-            while(browser.CursorIsIn && !browser.StartWith(TagEndToken))
-                browser.Move();
-            if(!browser.CursorIsIn)
-                throw new InvalidOperationException($"Miss '{TagEndToken}'");
-            var tag = new Tag(browser.Read());
+            var tagParser = new TagParser();
+            var tag = tagParser.Parse(browser);
             browser.Move(TagEndToken.Length);
             browser.JumpReaderCursorToCursor();
             if(tag.Name == "CSV")
