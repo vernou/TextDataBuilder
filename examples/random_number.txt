@@ -1,0 +1,17 @@
+The tag RandomInteger display a random number.
+
+Example :
+@{Text Raw="@{RandomInteger Min=1, Max=11}"}
+
+Result :
+@{RandomInteger Min=1, Max=11}
+
+It's possible to display more time the generated number with a alias.
+
+Example :
+First diplay - @{Text Raw="@{RandomInteger As=""RandomValue"", Min=1, Max=11}"}
+Rediplay - @{Text Raw="@{RandomValue}"}
+
+Result :
+First diplay - @{RandomInteger As="RandomValue", Min=1, Max=11}
+Second diplay - @{RandomValue}

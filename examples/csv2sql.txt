@@ -1,0 +1,6 @@
+INSERT INTO Products
+(Id, Label, Price)
+VALUES
+@{CSV Path="csv2sql_data.csv"}
+({0}, '{1}', {2})
+@{/CSV}

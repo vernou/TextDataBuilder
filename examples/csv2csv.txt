@@ -1,0 +1,3 @@
+@{CSV Path="csv2csv_data.csv}
+{2}, {1}, {3}, "New Value"
+@{/CSV}
