@@ -49,10 +49,8 @@ namespace TextDataBuilder.Parser
                 browser.SkipWhiteChar();
                 if (browser.StartWith(TagEndToken))
                     return parameters;
-                if (browser.CursorIsIn && browser.Current != ',')
-                    throw new InvalidOperationException("Expected ',' between parameters.");
-                browser.Move();
-                browser.SkipWhiteChar();
+                if (!browser.CursorIsIn)
+                    throw new InvalidOperationException("Miss '}' to close the tag.");
                 browser.JumpReaderCursorToCursor();
             }
             return parameters;
@@ -100,7 +98,7 @@ namespace TextDataBuilder.Parser
             }
             else
             {
-                while (browser.CursorIsIn && !browser.StartWith(TagEndToken) && !char.IsWhiteSpace(browser.Current) && browser.Current != ',')
+                while (browser.CursorIsIn && !browser.StartWith(TagEndToken) && !char.IsWhiteSpace(browser.Current))
                     browser.Move();
                 return browser.Read();
             }
