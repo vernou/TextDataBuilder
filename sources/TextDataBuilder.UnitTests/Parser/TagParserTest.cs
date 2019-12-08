@@ -47,7 +47,7 @@ namespace TextDataBuilder.UnitTests.Parser
         [Fact]
         public void TagWithTwoParameter()
         {
-            var tag = ParseTag("TagName Parameter1=Value1,Parameter2=Value2");
+            var tag = ParseTag("@{TagName Parameter1=Value1 Parameter2=Value2}");
             var parameter = tag.Parameters.First();
             Assert.True(tag.Parameters.ContainsKey("Parameter1"));
             Assert.Equal("Value1", tag.Parameters["Parameter1"]);
@@ -58,7 +58,7 @@ namespace TextDataBuilder.UnitTests.Parser
         [Fact]
         public void TagWithTwoParameterWithSpace()
         {
-            var tag = ParseTag("  TagName  Parameter1=Value1  ,  Parameter2=Value2  ");
+            var tag = ParseTag("@{  TagName  Parameter1=Value1    Parameter2=Value2  }");
             var parameter = tag.Parameters.First();
             Assert.True(tag.Parameters.ContainsKey("Parameter1"));
             Assert.Equal("Value1", tag.Parameters["Parameter1"]);
@@ -69,7 +69,7 @@ namespace TextDataBuilder.UnitTests.Parser
         [Fact]
         public void TagWithOneParameterWithSpaceInValue()
         {
-            var tag = ParseTag(@"TagName Parameter="" V a l u e """);
+            var tag = ParseTag(@"@{TagName Parameter="" V a l u e ""}");
             Assert.True(tag.Parameters.ContainsKey("Parameter"));
             Assert.Equal(" V a l u e ", tag.Parameters["Parameter"]);
         }

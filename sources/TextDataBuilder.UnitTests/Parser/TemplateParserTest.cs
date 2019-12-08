@@ -66,7 +66,7 @@ namespace TextDataBuilder.UnitTests.Parser
                 new TemplateParser(
                     new RiggedDice(42)
                 ).Parse(
-                    new Browser("A random integer : @{RandomInteger Min=42, Max=42}")
+                    new Browser("A random integer : @{RandomInteger Min=42 Max=42}")
                 ).Build()
             );
         }
@@ -147,7 +147,7 @@ namespace TextDataBuilder.UnitTests.Parser
                 ).Parse(
                     new Browser(
                         "Tow identical random integers : " +
-                        "@{RandomInteger As=Rand, Min=42, Max=42} and @{Rand}"
+                        "@{RandomInteger As=Rand Min=42 Max=42} and @{Rand}"
                     )
                 ).Build()
             );
@@ -177,7 +177,7 @@ namespace TextDataBuilder.UnitTests.Parser
                     new RiggedDice(42)
                 ).Parse(
                     new Browser(
-                        @"Raw text : @{Text As=Raw, Raw=""Poppey""} @{Raw}"
+                        @"Raw text : @{Text As=Raw Raw=""Poppey""} @{Raw}"
                     )
                 ).Build()
             );
