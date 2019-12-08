@@ -4,3 +4,4 @@ coverage:
       default:
         # basic
         target: 80%
+     patch: off
