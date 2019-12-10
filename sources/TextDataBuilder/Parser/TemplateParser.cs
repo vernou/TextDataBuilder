@@ -62,7 +62,8 @@ namespace TextDataBuilder.Parser
             var format = browser.Read();
             browser.Move(tagEndCsv.Length);
             browser.JumpReaderCursorToCursor();
-            return new Csv(beginTag.Parameters["Path"], format);
+            var join = beginTag.Parameters.ContainsKey("Join") ? beginTag.Parameters["Join"] : string.Empty;
+            return new Csv(beginTag.Parameters["Path"], format, join);
         }
 
         private IPrototype ParseTagData(Tag tag)

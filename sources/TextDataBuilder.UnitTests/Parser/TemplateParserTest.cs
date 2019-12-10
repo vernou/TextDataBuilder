@@ -110,6 +110,37 @@ namespace TextDataBuilder.UnitTests.Parser
         }
 
         [Fact]
+        public void PrintCsvTagWithJoinParameter()
+        {
+            var path = Path.GetTempFileName();
+            File.WriteAllText(
+                path,
+                "Value1,Value2,Value3" + Environment.NewLine +
+                "Value4,Value5,Value6" + Environment.NewLine +
+                "Value7,Value8,Value9"
+            );
+
+            Assert.Equal(
+                "INSERT INTO MyTable (Col1, Col2, Col3)" + Environment.NewLine +
+                "VALUES" + Environment.NewLine +
+                "(Value1, Value2, Value3)," + Environment.NewLine +
+                "(Value4, Value5, Value6)," + Environment.NewLine +
+                "(Value7, Value8, Value9)",
+                new TemplateParser(
+                    new RiggedDice(42)
+                ).Parse(
+                    new Browser(
+                        "INSERT INTO MyTable (Col1, Col2, Col3)" + Environment.NewLine +
+                        "VALUES" + Environment.NewLine +
+                        "@{CSV Path=\"" + path + "\" Join=\",\"}" + Environment.NewLine +
+                        "({0}, {1}, {2})" + Environment.NewLine +
+                        "@{/CSV}"
+                    )
+                ).Build()
+            );
+        }
+
+        [Fact]
         public void PrintSqlInsertFromCsv()
         {
             var path = Path.GetTempFileName();
