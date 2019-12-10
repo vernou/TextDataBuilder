@@ -7,11 +7,13 @@ namespace TextDataBuilder.Prototype
     {
         private readonly string path;
         private readonly string format;
+        private readonly string join;
 
-        public Csv(string path, string format)
+        public Csv(string path, string format, string join)
         {
             this.path = path;
             this.format = format;
+            this.join = join;
         }
 
         public string Build()
@@ -26,7 +28,7 @@ namespace TextDataBuilder.Prototype
                 {
                     build.Append(string.Format(format, parser.ReadFields()));
                     if(!parser.EndOfData)
-                        build.AppendLine();
+                        build.AppendLine(join);
                 }
             }
             return build.ToString();
