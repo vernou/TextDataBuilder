@@ -212,5 +212,40 @@ namespace TextDataBuilder.UnitTests.Parser
                 ).Build()
             );
         }
+
+        [Fact]
+        public void ThrowParsingException()
+        {
+            try
+            {
+                new TemplateParser(new RiggedDice(42)).Parse(new Browser("@{Text Fail}"));
+                Assert.True(false);
+            }
+            catch(ParsingException ex)
+            {
+                Assert.Equal(1, ex.Line);
+            }
+        }
+
+        [Fact]
+        public void ThrowParsingExceptionAtLine2()
+        {
+            try
+            {
+                new TemplateParser(new RiggedDice(42)).Parse(
+                    new Browser(
+                        "@{Text Raw=\"Text\"}" + Environment.NewLine +
+                        "@{Text Fail=True}" + Environment.NewLine +
+                        "@{Text Raw=\"Text\"}" + Environment.NewLine +
+                        "@{Text Raw=\"Text\"}"
+                    )
+                );
+                Assert.True(false);
+            }
+            catch(ParsingException ex)
+            {
+                Assert.Equal(2, ex.Line);
+            }
+        }
     }
 }

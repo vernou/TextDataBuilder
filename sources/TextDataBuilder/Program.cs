@@ -18,8 +18,19 @@ namespace TextDataBuilder
             {
                 path = args[0];
             }
-            var template = new TemplateParser(new Core.Dice()).Parse(new Browser(File.ReadAllText(path)));
-            Console.WriteLine(template.Build());
+            try
+            {
+                var template = new TemplateParser(new Core.Dice()).Parse(new Browser(File.ReadAllText(path)));
+                Console.WriteLine(template.Build());
+            }
+            catch(ParsingException ex)
+            {
+                Console.Error.WriteLine($"l.{ex.Line} : {ex.Message}");
+            }
+            catch(Exception ex)
+            {
+                Console.Error.WriteLine(ex.ToString());
+            }
         }
     }
 }
