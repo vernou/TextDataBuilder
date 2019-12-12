@@ -26,18 +26,25 @@ namespace TextDataBuilder.Parser
 
         public Template Parse(Browser browser)
         {
-            var prototypes = new List<IPrototype>();
-            while(browser.CursorIsIn)
+            try
             {
-                while(browser.CursorIsIn && !browser.StartWith(TagStartToken))
-                    browser.Move();
-                prototypes.Add(new StaticText(browser.Read()));
-                if(browser.CursorIsIn)
+                var prototypes = new List<IPrototype>();
+                while(browser.CursorIsIn)
                 {
-                    prototypes.Add(ParseTag(browser));
+                    while(browser.CursorIsIn && !browser.StartWith(TagStartToken))
+                        browser.Move();
+                    prototypes.Add(new StaticText(browser.Read()));
+                    if(browser.CursorIsIn)
+                    {
+                        prototypes.Add(ParseTag(browser));
+                    }
                 }
+                return new Template(prototypes);
             }
-            return new Template(prototypes);
+            catch(InvalidOperationException ex)
+            {
+                throw new ParsingException(browser.CurrentLine(), ex);
+            }
         }
 
         private IPrototype ParseTag(Browser browser)
