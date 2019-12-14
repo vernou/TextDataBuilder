@@ -6,15 +6,17 @@ namespace TextDataBuilder.Parser
 {
     public class TagParser
     {
-        internal const string TagStartToken = "@{";
-        internal const string TagEndToken = "}";
+        internal const string StartToken = "@{";
+        internal const string EndToken = "}";
 
         public Tag Parse(Browser browser)
         {
-            browser.Move(TagStartToken.Length);
+            browser.Move(StartToken.Length);
             browser.JumpReaderCursorToCursor();
             var name = ParseTagName(browser);
             var parameters = ParseParameters(browser);
+            browser.Move(EndToken.Length);
+            browser.JumpReaderCursorToCursor();
             return new Tag(name, parameters);
         }
 
@@ -22,7 +24,7 @@ namespace TextDataBuilder.Parser
         {
             browser.SkipWhiteChar();
             browser.JumpReaderCursorToCursor();
-            while (browser.CursorIsIn && !browser.StartWith(TagEndToken) && !char.IsWhiteSpace(browser.Current))
+            while (browser.CursorIsIn && !browser.StartWith(EndToken) && !char.IsWhiteSpace(browser.Current))
             {
                 browser.Move();
             }
@@ -30,7 +32,7 @@ namespace TextDataBuilder.Parser
             var name = browser.Read();
             if (name == string.Empty)
                 throw new InvalidOperationException($"The prototype name '{name}' is invalid. The name can't be empty");
-            if (!Regex.IsMatch(name, "^[a-zA-Z0-9]+$"))
+            if (!Regex.IsMatch(name, "^/?[a-zA-Z0-9]+$"))
                 throw new InvalidOperationException($"The prototype name '{name}' is invalid. Valid characters are [a-zA-Z0-9].");
             return name;
         }
@@ -42,12 +44,12 @@ namespace TextDataBuilder.Parser
             browser.SkipWhiteChar();
             browser.JumpReaderCursorToCursor();
 
-            while (browser.CursorIsIn && !browser.StartWith(TagEndToken))
+            while (browser.CursorIsIn && !browser.StartWith(EndToken))
             {
                 var parameter = ParseParameter(browser);
                 parameters.Add(parameter.Key, parameter.Value);
                 browser.SkipWhiteChar();
-                if (browser.StartWith(TagEndToken))
+                if (browser.StartWith(EndToken))
                     return parameters;
                 if (!browser.CursorIsIn)
                     throw new InvalidOperationException("Miss '}' to close the tag.");
@@ -98,7 +100,7 @@ namespace TextDataBuilder.Parser
             }
             else
             {
-                while (browser.CursorIsIn && !browser.StartWith(TagEndToken) && !char.IsWhiteSpace(browser.Current))
+                while (browser.CursorIsIn && !browser.StartWith(EndToken) && !char.IsWhiteSpace(browser.Current))
                     browser.Move();
                 return browser.Read();
             }

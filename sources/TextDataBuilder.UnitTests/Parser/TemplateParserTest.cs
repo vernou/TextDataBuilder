@@ -141,6 +141,33 @@ namespace TextDataBuilder.UnitTests.Parser
         }
 
         [Fact]
+        public void PrintCsvTagWithTagInContent()
+        {
+            var path = Path.GetTempFileName();
+            File.WriteAllText(
+                path,
+                "Val1,Val2,Val3" + Environment.NewLine +
+                "Val4,Val5,Val6" + Environment.NewLine +
+                "Val7,Val8,Val9"
+            );
+
+            Assert.Equal(
+                "Val1, 42, Val3, End" + Environment.NewLine +
+                "Val4, 42, Val6, End" + Environment.NewLine +
+                "Val7, 42, Val9, End",
+                new TemplateParser(
+                    new RiggedDice(42)
+                ).Parse(
+                    new Browser(
+                        "@{CSV Path=\"" + path + "\"}" + Environment.NewLine +
+                        "{0}, @{RandomInteger Min=27 Max=42}, {2}, @{Text Raw=\"End\"}" + Environment.NewLine +
+                        "@{/CSV}"
+                    )
+                ).Build()
+            );
+        }
+
+        [Fact]
         public void PrintSqlInsertFromCsv()
         {
             var path = Path.GetTempFileName();
