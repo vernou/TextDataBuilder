@@ -7,9 +7,7 @@ namespace TextDataBuilder.Parser
 {
     public class TemplateParser
     {
-        private const string TagStartToken = "@{";
-        private const string TagEndToken = "}";
-
+        private readonly TagParser _tagParser = new TagParser();
         private readonly Dictionary<string, Func<Tag, IPrototype>> factory;
         private readonly Dictionary<string, Alias> alias = new Dictionary<string, Alias>();
         private readonly IDice dice;
@@ -26,26 +24,32 @@ namespace TextDataBuilder.Parser
 
         public Template Parse(Browser browser)
         {
+            return ParseWithEnd(browser, string.Empty);
+        }
+
+        public Template ParseWithEnd(Browser browser, string contentTagName)
+        {
             var prototypes = new List<IPrototype>();
-            while(browser.CursorIsIn)
+            while (browser.CursorIsIn)
             {
-                while(browser.CursorIsIn && !browser.StartWith(TagStartToken))
+                while (browser.CursorIsIn && !browser.StartWith(TagParser.StartToken))
                     browser.Move();
                 prototypes.Add(new StaticText(browser.Read()));
-                if(browser.CursorIsIn)
+                if (browser.CursorIsIn)
                 {
-                    prototypes.Add(ParseTag(browser));
+                    var tag = _tagParser.Parse(browser);
+                    if(tag.Name == "/" + contentTagName)
+                    {
+                        break;
+                    }
+                    prototypes.Add(ParseTag(tag, browser));
                 }
             }
             return new Template(prototypes);
         }
 
-        private IPrototype ParseTag(Browser browser)
+        private IPrototype ParseTag(Tag tag, Browser browser)
         {
-            var tagParser = new TagParser();
-            var tag = tagParser.Parse(browser);
-            browser.Move(TagEndToken.Length);
-            browser.JumpReaderCursorToCursor();
             if(tag.Name == "CSV")
                 return ParseTagCsv(browser, tag);
             else
@@ -54,15 +58,14 @@ namespace TextDataBuilder.Parser
 
         private IPrototype ParseTagCsv(Browser browser, Tag beginTag)
         {
-            var tagEndCsv = Environment.NewLine + "@{/CSV}";
             browser.Move(Environment.NewLine.Length);
             browser.JumpReaderCursorToCursor();
-            while(browser.CursorIsIn && !browser.StartWith(tagEndCsv))
-                browser.Move();
-            var format = browser.Read();
-            browser.Move(tagEndCsv.Length);
+            var content = ParseWithEnd(browser, beginTag.Name);
             browser.JumpReaderCursorToCursor();
             var join = beginTag.Parameters.ContainsKey("Join") ? beginTag.Parameters["Join"] : string.Empty;
+            var format = content.Build();
+            if (format.EndsWith(Environment.NewLine))
+                format = format.Remove(format.Length - Environment.NewLine.Length);
             return new Csv(beginTag.Parameters["Path"], format, join);
         }
 
